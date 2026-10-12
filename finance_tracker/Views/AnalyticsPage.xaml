@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FinanceTracker.ViewModels"
+             xmlns:models="clr-namespace:FinanceTracker.Models"
+             x:Class="FinanceTracker.Views.AnalyticsPage"
+             x:DataType="viewmodels:AnalyticsViewModel"
+             Title="Analytics &amp; Budgets"
+             BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource Gray950}}">
+
+    <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding LoadAnalyticsCommand}">
+        <ScrollView>
+            <VerticalStackLayout Spacing="18" Padding="18,16,18,30">
+
+                <!-- Header Title -->
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Financial Insights" 
+                           FontSize="22" 
+                           FontAttributes="Bold" 
+                           TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                    <Label Text="Monitor category spending patterns and budgets" 
+                           FontSize="12" 
+                           TextColor="{StaticResource TextMuted}" />
+                </VerticalStackLayout>
+
+                <!-- High-level Metric Cards (Grid of 2x2 cards) -->
+                <Grid ColumnDefinitions="*,10,*" RowDefinitions="Auto,10,Auto">
+                    <!-- Net Savings -->
+                    <Border Grid.Row="0" Grid.Column="0"
+                            StrokeShape="RoundRectangle 14"
+                            Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                            StrokeThickness="1"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardBgLight}, Dark={StaticResource CardBgDark}}"
+                            Padding="14,12">
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="NET SAVINGS" FontSize="10" TextColor="{StaticResource TextMuted}" FontAttributes="Bold" CharacterSpacing="0.5"/>
+                            <Label Text="{Binding NetSavings, Converter={StaticResource CurrencyConverter}}"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Savings Rate -->
+                    <Border Grid.Row="0" Grid.Column="2"
+                            StrokeShape="RoundRectangle 14"
+                            Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                            StrokeThickness="1"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardBgLight}, Dark={StaticResource CardBgDark}}"
+                            Padding="14,12">
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="SAVINGS RATE" FontSize="10" TextColor="{StaticResource TextMuted}" FontAttributes="Bold" CharacterSpacing="0.5"/>
+                            <Label Text="{Binding SavingsRate, StringFormat='{0:F1}%'}"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource IncomeGreen}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Total Income -->
+                    <Border Grid.Row="2" Grid.Column="0"
+                            StrokeShape="RoundRectangle 14"
+                            Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                            StrokeThickness="1"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardBgLight}, Dark={StaticResource CardBgDark}}"
+                            Padding="14,12">
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="TOTAL INCOME" FontSize="10" TextColor="{StaticResource TextMuted}" FontAttributes="Bold" CharacterSpacing="0.5"/>
+                            <Label Text="{Binding TotalIncome, Converter={StaticResource CurrencyConverter}}"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource IncomeGreen}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Total Expenses -->
+                    <Border Grid.Row="2" Grid.Column="2"
+                            StrokeShape="RoundRectangle 14"
+                            Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                            StrokeThickness="1"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource CardBgLight}, Dark={StaticResource CardBgDark}}"
+                            Padding="14,12">
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="TOTAL EXPENSES" FontSize="10" TextColor="{StaticResource TextMuted}" FontAttributes="Bold" CharacterSpacing="0.5"/>
+                            <Label Text="{Binding TotalExpense, Converter={StaticResource CurrencyConverter}}"
+                                   FontSize="16"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource ExpenseRed}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- Navigation Tabs: Breakdown / Trends / Budgets -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
+                    <Button Grid.Column="0"
+                            Text="Breakdown"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            HeightRequest="36"
+                            CornerRadius="18"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                            TextColor="{AppThemeBinding Light={StaticResource PrimaryDarkText}, Dark={StaticResource White}}"
+                            Command="{Binding SwitchTabCommand}"
+                            CommandParameter="Breakdown" />
+
+                    <Button Grid.Column="1"
+                            Text="Monthly Trends"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            HeightRequest="36"
+                            CornerRadius="18"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                            TextColor="{AppThemeBinding Light={StaticResource PrimaryDarkText}, Dark={StaticResource White}}"
+                            Command="{Binding SwitchTabCommand}"
+                            CommandParameter="Trends" />
+
+                    <Button Grid.Column="2"
+                            Text="Budgets"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            HeightRequest="36"
+                            CornerRadius="18"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                            TextColor="{AppThemeBinding Light={StaticResource PrimaryDarkText}, Dark={StaticResource White}}"
+                            Command="{Binding SwitchTabCommand}"
+                            CommandParameter="Budgets" />
+                </Grid>
+
+                <!-- TAB 1: Category Spending Breakdown -->
+                <Border StrokeShape="RoundRectangle 16"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeThickness="1"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CardBgLight}, Dark={StaticResource CardBgDark}}"
+                        Padding="16">
+
+                    <VerticalStackLayout Spacing="16">
+                        <Label Text="Category Spending Breakdown"
+                               FontSize="15"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+
+                        <CollectionView ItemsSource="{Binding ExpenseBreakdown}"
+                                        SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:CategorySummary">
+                                    <VerticalStackLayout Spacing="6" Margin="0,4,0,12">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                            <Label Grid.Column="0" 
+                                                   Text="{Binding Icon}" 
+                                                   FontSize="20" 
+                                                   VerticalOptions="Center" />
+
+                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                                <Label Text="{Binding CategoryName}" 
+                                                       FontAttributes="Bold" 
+                                                       FontSize="13" 
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                                                <Label Text="{Binding TransactionCount, StringFormat='{0} transaction(s)'}" 
+                                                       FontSize="11" 
+                                                       TextColor="{StaticResource TextMuted}" />
+                                            </VerticalStackLayout>
+
+                                            <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="End">
+                                                <Label Text="{Binding FormattedTotal}" 
+                                                       FontAttributes="Bold" 
+                                                       FontSize="13" 
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" 
+                                                       HorizontalOptions="End" />
+                                                <Label Text="{Binding FormattedPercentage}" 
+                                                       FontSize="11" 
+                                                       FontAttributes="Bold"
+                                                       TextColor="{StaticResource Primary}" 
+                                                       HorizontalOptions="End" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+
+                                        <!-- Progress Bar for Percentage -->
+                                        <ProgressBar Progress="{Binding Percentage}" 
+                                                     ProgressColor="{StaticResource Primary}" 
+                                                     HeightRequest="6" />
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+                        <Label Text="No expense data recorded."
+                               IsVisible="{Binding HasExpenseData, Converter={StaticResource InverseBoolConverter}}"
+                               FontSize="13"
+                               TextColor="{StaticResource TextMuted}"
+                               HorizontalOptions="Center"
+                               Margin="0,10" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- TAB 2: Monthly Trends Comparative Bar Chart -->
+                <Border StrokeShape="RoundRectangle 16"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeThickness="1"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CardBgLight}, Dark={StaticResource CardBgDark}}"
+                        Padding="16">
+
+                    <VerticalStackLayout Spacing="14">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0"
+                                   Text="Income vs Expense Trends"
+                                   FontSize="15"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+
+                            <!-- Legend -->
+                            <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
+                                <HorizontalStackLayout Spacing="4">
+                                    <BoxView WidthRequest="10" HeightRequest="10" CornerRadius="5" Color="{StaticResource IncomeGreen}" VerticalOptions="Center"/>
+                                    <Label Text="Income" FontSize="11" TextColor="{StaticResource TextMuted}"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="4">
+                                    <BoxView WidthRequest="10" HeightRequest="10" CornerRadius="5" Color="{StaticResource ExpenseRed}" VerticalOptions="Center"/>
+                                    <Label Text="Expense" FontSize="11" TextColor="{StaticResource TextMuted}"/>
+                                </HorizontalStackLayout>
+                            </HorizontalStackLayout>
+                        </Grid>
+
+                        <!-- Bar Chart Canvas/Layout -->
+                        <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                            <HorizontalStackLayout Spacing="18" 
+                                                   HeightRequest="170" 
+                                                   BindableLayout.ItemsSource="{Binding MonthlyTrends}" 
+                                                   VerticalOptions="End">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:MonthlyTrendItem">
+                                        <VerticalStackLayout Spacing="6" VerticalOptions="End" WidthRequest="48">
+                                            <!-- Paired Bars -->
+                                            <Grid ColumnDefinitions="14,14" ColumnSpacing="4" HeightRequest="120" VerticalOptions="End">
+                                                <!-- Income Bar -->
+                                                <BoxView Grid.Column="0"
+                                                         HeightRequest="{Binding RelativeIncomeHeight}"
+                                                         WidthRequest="14"
+                                                         CornerRadius="4"
+                                                         Color="{StaticResource IncomeGreen}"
+                                                         VerticalOptions="End" />
+
+                                                <!-- Expense Bar -->
+                                                <BoxView Grid.Column="1"
+                                                         HeightRequest="{Binding RelativeExpenseHeight}"
+                                                         WidthRequest="14"
+                                                         CornerRadius="4"
+                                                         Color="{StaticResource ExpenseRed}"
+                                                         VerticalOptions="End" />
+                                            </Grid>
+
+                                            <!-- Month Label -->
+                                            <Label Text="{Binding MonthLabel}"
+                                                   FontSize="11"
+                                                   FontAttributes="Bold"
+                                                   TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}"
+                                                   HorizontalOptions="Center" />
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </HorizontalStackLayout>
+                        </ScrollView>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- TAB 3: Category Budget Limits & Target Tracking -->
+                <Border StrokeShape="RoundRectangle 16"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeThickness="1"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource CardBgLight}, Dark={StaticResource CardBgDark}}"
+                        Padding="16">
+
+                    <VerticalStackLayout Spacing="14">
+                        <Label Text="Monthly Category Budgets"
+                               FontSize="15"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+
+                        <CollectionView ItemsSource="{Binding BudgetSummaries}"
+                                        SelectionMode="None">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:CategorySummary">
+                                    <Border StrokeShape="RoundRectangle 12"
+                                            StrokeThickness="0"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                            Padding="12"
+                                            Margin="0,0,0,10">
+                                        <VerticalStackLayout Spacing="8">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                                <Label Grid.Column="0" Text="{Binding Icon}" FontSize="20" VerticalOptions="Center" />
+                                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                                    <Label Text="{Binding CategoryName}" 
+                                                           FontAttributes="Bold" 
+                                                           FontSize="13" 
+                                                           TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                                                    <Label Text="{Binding BudgetStatusText}" 
+                                                           FontSize="11" 
+                                                           TextColor="{Binding BudgetStatusColor}" 
+                                                           FontAttributes="Bold" />
+                                                </VerticalStackLayout>
+
+                                                <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="End">
+                                                    <Label Text="{Binding FormattedTotal}" 
+                                                           FontAttributes="Bold" 
+                                                           FontSize="13" 
+                                                           TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                                                    <Label Text="{Binding BudgetLimit, StringFormat='Limit: ${0:N0}'}" 
+                                                           FontSize="11" 
+                                                           TextColor="{StaticResource TextMuted}" />
+                                                </VerticalStackLayout>
+                                            </Grid>
+
+                                            <!-- Budget Progress Bar -->
+                                            <ProgressBar Progress="{Binding BudgetProgress}" 
+                                                         ProgressColor="{Binding BudgetStatusColor}" 
+                                                         HeightRequest="6" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+
+                        <Label Text="No budget targets configured yet."
+                               IsVisible="{Binding HasBudgetData, Converter={StaticResource InverseBoolConverter}}"
+                               FontSize="13"
+                               TextColor="{StaticResource TextMuted}"
+                               HorizontalOptions="Center"
+                               Margin="0,10" />
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

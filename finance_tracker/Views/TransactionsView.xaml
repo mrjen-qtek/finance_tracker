@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FinanceTracker.ViewModels"
+             xmlns:models="clr-namespace:FinanceTracker.Models"
+             x:Class="FinanceTracker.Views.TransactionsView"
+             x:Name="transactionsRoot"
+             x:DataType="viewmodels:TransactionsViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource Gray950}}">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- Top Search and Filter Bar -->
+        <VerticalStackLayout Grid.Row="0" Spacing="10" Padding="16,14,16,8">
+            <SearchBar Placeholder="Search by title, category, or note..."
+                       Text="{Binding SearchText}"
+                       SearchCommand="{Binding LoadTransactionsCommand}"
+                       BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                       CancelButtonColor="{StaticResource Primary}" />
+
+            <!-- Type Filters (All / Expense / Income) -->
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                <Button Grid.Column="0"
+                        Text="All"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        Padding="0"
+                        HeightRequest="36"
+                        CornerRadius="18"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                        TextColor="{AppThemeBinding Light={StaticResource PrimaryDarkText}, Dark={StaticResource White}}"
+                        Command="{Binding ChangeTypeFilterCommand}"
+                        CommandParameter="All" />
+                <Button Grid.Column="1"
+                        Text="Expenses"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        Padding="0"
+                        HeightRequest="36"
+                        CornerRadius="18"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                        TextColor="{StaticResource ExpenseRed}"
+                        Command="{Binding ChangeTypeFilterCommand}"
+                        CommandParameter="Expenses" />
+                <Button Grid.Column="2"
+                        Text="Income"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        Padding="0"
+                        HeightRequest="36"
+                        CornerRadius="18"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                        TextColor="{StaticResource IncomeGreen}"
+                        Command="{Binding ChangeTypeFilterCommand}"
+                        CommandParameter="Income" />
+            </Grid>
+
+            <!-- Secondary Filters: Category Dropdown & Period Chips -->
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <Border Grid.Column="0"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeThickness="1"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                        Padding="12,0">
+                    <Picker Title="Select Category"
+                            ItemsSource="{Binding AvailableCategories}"
+                            SelectedItem="{Binding SelectedCategoryFilter}"
+                            SelectedIndexChanged="OnCategoryPickerChanged"
+                            TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}"
+                            TitleColor="{StaticResource TextMuted}" />
+                </Border>
+
+                <Button Grid.Column="1"
+                        Text="Reset Filters"
+                        FontSize="12"
+                        Padding="12,0"
+                        HeightRequest="40"
+                        CornerRadius="12"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}"
+                        TextColor="{AppThemeBinding Light={StaticResource TextMuted}, Dark={StaticResource Gray400}}"
+                        Command="{Binding ClearFiltersCommand}" />
+            </Grid>
+        </VerticalStackLayout>
+
+        <!-- Metrics Header for Filtered Results -->
+        <Border Grid.Row="1"
+                Margin="16,4,16,8"
+                StrokeShape="RoundRectangle 12"
+                StrokeThickness="0"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                Padding="14,10">
+            <Grid ColumnDefinitions="*,Auto">
+                <HorizontalStackLayout Grid.Column="0" Spacing="6" VerticalOptions="Center">
+                    <Label Text="Showing:" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                    <Label Text="{Binding FilteredCount, StringFormat='{0} record(s)'}" 
+                           FontSize="12" 
+                           FontAttributes="Bold" 
+                           TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
+                    <Label Text="Total:" FontSize="12" TextColor="{StaticResource TextMuted}" />
+                    <Label Text="{Binding FilteredTotal, Converter={StaticResource CurrencyConverter}}" 
+                           FontSize="13" 
+                           FontAttributes="Bold" 
+                           TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                </HorizontalStackLayout>
+            </Grid>
+        </Border>
+
+        <!-- Direct CollectionView without nested RefreshView -->
+        <Grid Grid.Row="2">
+            <CollectionView ItemsSource="{Binding Transactions}"
+                            SelectionMode="None"
+                            Margin="16,0,16,6">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:TransactionItem">
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems Mode="Reveal">
+                                    <SwipeItem Text="Delete"
+                                               BackgroundColor="#EF4444"
+                                               Command="{Binding Source={x:Reference transactionsRoot}, Path=BindingContext.DeleteTransactionCommand}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+                            <Border StrokeShape="RoundRectangle 14"
+                                    Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBgLight}, Dark={StaticResource CardBgDark}}"
+                                    Padding="14,12"
+                                    Margin="0,0,0,10">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={x:Reference transactionsRoot}, Path=BindingContext.EditTransactionCommand}"
+                                                          CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <!-- Category Icon Avatar -->
+                                    <Border Grid.Column="0"
+                                            StrokeShape="RoundRectangle 12"
+                                            StrokeThickness="0"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                            WidthRequest="44"
+                                            HeightRequest="44"
+                                            VerticalOptions="Center">
+                                        <Label Text="{Binding CategoryIcon}"
+                                               FontSize="22"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center" />
+                                    </Border>
+
+                                    <!-- Title and metadata -->
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <Label Text="{Binding Title}"
+                                               FontAttributes="Bold"
+                                               FontSize="14"
+                                               LineBreakMode="TailTruncation"
+                                               TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+
+                                        <HorizontalStackLayout Spacing="6">
+                                            <Label Text="{Binding FormattedDate}"
+                                                   FontSize="11"
+                                                   TextColor="{StaticResource TextMuted}" />
+                                            <Label Text="•" FontSize="11" TextColor="{StaticResource TextMuted}" />
+                                            <Label Text="{Binding Category}"
+                                                   FontSize="11"
+                                                   TextColor="{StaticResource TextMuted}" />
+                                        </HorizontalStackLayout>
+
+                                        <!-- Optional Note -->
+                                        <Label Text="{Binding Note}"
+                                               FontSize="11"
+                                               TextColor="{StaticResource TextMuted}"
+                                               LineBreakMode="TailTruncation"
+                                               IsVisible="{Binding Note, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
+                                    </VerticalStackLayout>
+
+                                    <!-- Amount & Payment Method -->
+                                    <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="End" Spacing="2">
+                                        <Label Text="{Binding FormattedAmount}"
+                                               FontAttributes="Bold"
+                                               FontSize="15"
+                                               TextColor="{Binding AmountColorHex}" />
+                                        <Label Text="{Binding PaymentMethodDisplay}"
+                                               FontSize="10"
+                                               TextColor="{StaticResource TextMuted}"
+                                               HorizontalOptions="End" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Empty State -->
+            <VerticalStackLayout IsVisible="{Binding HasTransactions, Converter={StaticResource InverseBoolConverter}}"
+                                 Spacing="12"
+                                 VerticalOptions="Center"
+                                 HorizontalOptions="Center"
+                                 Padding="20">
+                <Label Text="🔍" FontSize="44" HorizontalOptions="Center" />
+                <Label Text="No transactions match your search"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}"
+                       HorizontalOptions="Center" />
+                <Label Text="Try adjusting the filters or record a new transaction"
+                       FontSize="13"
+                       TextColor="{StaticResource TextMuted}"
+                       HorizontalOptions="Center" />
+                <Button Text="+ Add New Transaction"
+                        Margin="0,10,0,0"
+                        Padding="20,10"
+                        CornerRadius="20"
+                        BackgroundColor="{StaticResource Primary}"
+                        TextColor="White"
+                        Command="{Binding AddNewTransactionCommand}" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Action Button for Adding Transactions -->
+        <Border Grid.Row="3"
+                StrokeShape="RoundRectangle 18"
+                StrokeThickness="0"
+                BackgroundColor="{StaticResource Primary}"
+                Margin="16,4,16,10"
+                Padding="16,10"
+                Shadow="{Shadow Brush=Black, Offset='0,3', Radius=8, Opacity=0.2}">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding AddNewTransactionCommand}" />
+            </Border.GestureRecognizers>
+            <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
+                <Label Text="➕" FontSize="14" VerticalOptions="Center" TextColor="White" />
+                <Label Text="Record New Transaction"
+                       FontSize="13"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       VerticalOptions="Center" />
+            </HorizontalStackLayout>
+        </Border>
+
+    </Grid>
+</ContentView>
