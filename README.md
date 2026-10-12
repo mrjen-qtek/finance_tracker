@@ -100,3 +100,7 @@ dotnet run -f net10.0-windows10.0.19041.0
 ```bash
 dotnet test tests/FinanceTracker.Tests/FinanceTracker.Tests.csproj -f net10.0-windows10.0.19041.0
 ```
+
+## Output
+
+<img width="452" height="1030" alt="image" src="https://github.com/user-attachments/assets/4ea5290b-2dff-4a21-9cac-7d47b1ba98ff" />
