@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FinanceTracker.ViewModels"
+             xmlns:models="clr-namespace:FinanceTracker.Models"
+             x:Class="FinanceTracker.Views.AddEditTransactionPage"
+             x:DataType="viewmodels:AddEditTransactionViewModel"
+             Title="{Binding FormTitle}"
+             BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource Gray950}}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="18" Padding="18,16,18,30">
+
+            <!-- Type Selector: Expense vs Income Pills -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        Text="💸 Expense"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        HeightRequest="44"
+                        CornerRadius="22"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                        TextColor="{StaticResource ExpenseRed}"
+                        Command="{Binding ChangeTypeCommand}"
+                        CommandParameter="Expense" />
+
+                <Button Grid.Column="1"
+                        Text="💵 Income"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        HeightRequest="44"
+                        CornerRadius="22"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                        TextColor="{StaticResource IncomeGreen}"
+                        Command="{Binding ChangeTypeCommand}"
+                        CommandParameter="Income" />
+            </Grid>
+
+            <!-- Large Amount Input Card -->
+            <Border StrokeShape="RoundRectangle 20"
+                    StrokeThickness="0"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBgLight}, Dark={StaticResource CardBgDark}}"
+                    Padding="20"
+                    Shadow="{Shadow Brush=Black, Offset='0,4', Radius=10, Opacity=0.1}">
+                <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                    <Label Text="ENTER AMOUNT"
+                           FontSize="11"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource TextMuted}"
+                           CharacterSpacing="1"
+                           HorizontalOptions="Center" />
+
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
+                        <Label Text="$"
+                               FontSize="32"
+                               FontAttributes="Bold"
+                               TextColor="{StaticResource Primary}"
+                               VerticalOptions="Center" />
+                        <Entry Text="{Binding AmountText}"
+                               Placeholder="0.00"
+                               FontSize="36"
+                               FontAttributes="Bold"
+                               Keyboard="Numeric"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}"
+                               WidthRequest="220" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Validation Error Alert Banner -->
+            <Border StrokeShape="RoundRectangle 12"
+                    StrokeThickness="0"
+                    BackgroundColor="{StaticResource ExpenseRedLight}"
+                    Padding="14,10"
+                    IsVisible="{Binding HasError}">
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                    <Label Text="⚠️" FontSize="16" VerticalOptions="Center" />
+                    <Label Text="{Binding ErrorMessage}"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource ExpenseRed}"
+                           VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- Form Details Card -->
+            <Border StrokeShape="RoundRectangle 18"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                    StrokeThickness="1"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource CardBgLight}, Dark={StaticResource CardBgDark}}"
+                    Padding="18">
+
+                <VerticalStackLayout Spacing="16">
+
+                    <!-- Title / Payee Entry -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Title / Payee"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                        <Border StrokeShape="RoundRectangle 10"
+                                Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                StrokeThickness="1"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource Gray900}}"
+                                Padding="12,0">
+                            <Entry Text="{Binding RecordTitle}"
+                                   Placeholder="e.g. Grocery Store, Client Payment"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}"
+                                   PlaceholderColor="{StaticResource TextMuted}" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Category Selector (Visual Chip List) -->
+                    <VerticalStackLayout Spacing="6">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0"
+                                   Text="Category"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                            <Label Grid.Column="1"
+                                   Text="{Binding SelectedCategory.Name}"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource Primary}" />
+                        </Grid>
+
+                        <!-- Horizontal Category Badges -->
+                        <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                            <HorizontalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding AvailableCategories}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:CategoryItem">
+                                        <Border StrokeShape="RoundRectangle 14"
+                                                Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                                StrokeThickness="1"
+                                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                                                Padding="12,8">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:AddEditTransactionViewModel}}, Path=SelectCategoryCommand}"
+                                                                      CommandParameter="{Binding .}" />
+                                            </Border.GestureRecognizers>
+                                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                                <Label Text="{Binding Icon}" FontSize="16" VerticalOptions="Center" />
+                                                <Label Text="{Binding Name}" 
+                                                       FontSize="12" 
+                                                       FontAttributes="Bold"
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" 
+                                                       VerticalOptions="Center" />
+                                            </HorizontalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </HorizontalStackLayout>
+                        </ScrollView>
+                    </VerticalStackLayout>
+
+                    <!-- Date Picker -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Date"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                        <Border StrokeShape="RoundRectangle 10"
+                                Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                StrokeThickness="1"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource Gray900}}"
+                                Padding="12,0">
+                            <DatePicker Date="{Binding TransactionDate}"
+                                        TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Payment Method Picker -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Payment Method"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                        <Border StrokeShape="RoundRectangle 10"
+                                Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                StrokeThickness="1"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource Gray900}}"
+                                Padding="12,0">
+                            <Picker ItemsSource="{Binding AvailablePaymentMethods}"
+                                    SelectedItem="{Binding SelectedPaymentMethod}"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Notes / Description -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Note / Receipt Details (Optional)"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}" />
+                        <Border StrokeShape="RoundRectangle 10"
+                                Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                StrokeThickness="1"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceLight}, Dark={StaticResource Gray900}}"
+                                Padding="12,8">
+                            <Editor Text="{Binding Note}"
+                                    Placeholder="Add notes or tags..."
+                                    AutoSize="TextChanges"
+                                    HeightRequest="70"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextTitle}, Dark={StaticResource White}}"
+                                    PlaceholderColor="{StaticResource TextMuted}" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Save and Cancel Actions -->
+            <VerticalStackLayout Spacing="10">
+                <Button Text="Save Transaction"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        HeightRequest="48"
+                        CornerRadius="16"
+                        BackgroundColor="{StaticResource Primary}"
+                        TextColor="White"
+                        Command="{Binding SaveCommand}" />
+
+                <Button Text="Cancel"
+                        FontSize="14"
+                        HeightRequest="44"
+                        CornerRadius="16"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource TextMuted}"
+                        Command="{Binding CancelCommand}" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
